@@ -44,11 +44,10 @@ class EmailExtractor:
 
     def write_csv(self, unique_emails):
         """writing emails in csv file"""
-        sorted_emails = sorted(unique_emails)
         with open(self.output_file, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['Email'])
-            for email in sorted_emails:
+            for email in unique_emails:
                 writer.writerow([email])
 
     def format_emails(self, emails):
@@ -58,7 +57,7 @@ class EmailExtractor:
             if parts[-1] == 'c' or parts[-1] == 'co' or parts[-1] == '':
                 parts[-1] = 'com'
                 emails[i] = '.'.join(parts)
-        return emails
+            return emails
 
 def main():
     """main function"""
