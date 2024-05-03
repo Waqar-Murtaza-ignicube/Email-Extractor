@@ -3,7 +3,6 @@ import os
 import re
 import csv
 import argparse
-import shutil
 from pdfminer.high_level import extract_text
 
 class EmailExtractor:
@@ -21,43 +20,40 @@ class EmailExtractor:
             return None
         return match.group()
 
-    def read_files(self):
-        """getting directory and reading files"""
+    def read_pdf(self):
+        """getting directory and reading pdfs"""
         all_emails = []
-
         for filename in os.listdir(self.resume_directory):
-            file_path = os.path.join(self.resume_directory, filename)
-            if not filename.endswith('.pdf'):
-                self.move_file(filename, file_path)
-            text = extract_text(file_path)
-            extracted_emails = self.extract_emails(text)
-            if not extracted_emails:
-                self.move_file(filename, file_path)
-            all_emails.append(extracted_emails)
-
+            if filename.endswith('.pdf'):
+                file_path = os.path.join(self.resume_directory, filename)
+                text = extract_text(file_path)
+                extracted_emails = self.extract_emails(text)
+                print(extracted_emails, file_path)
+                if extracted_emails is None:
+                    dest_path = os.path.join(self.not_found_path, filename)
+                    os.rename(file_path, dest_path)
+                all_emails.append(extracted_emails)
+            else:
+                dest_path = os.path.join(self.not_found_path, filename)
+                os.rename(file_path, dest_path)
         return all_emails
-
-    def move_file(self, filename, source):
-        """move file from source to destination"""
-        dest_path = os.path.join(self.not_found_path, filename)
-        shutil.move(source, dest_path)
 
     def write_csv(self, unique_emails):
         """writing emails in csv file"""
-        sorted_emails = sorted(unique_emails)
         with open(self.output_file, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['Email'])
-            for email in sorted_emails:
+            for email in unique_emails:
                 writer.writerow([email])
 
     def format_emails(self, emails):
         """formatting emails"""
         for i, email in enumerate(emails):
-            parts = email.split('.')
-            if parts[-1] == 'c' or parts[-1] == 'co' or parts[-1] == '':
-                parts[-1] = 'com'
-                emails[i] = '.'.join(parts)
+            if email is not None:
+                parts = email.split('.')
+                if parts[-1] == 'c' or parts[-1] == 'co' or parts[-1] == '':
+                    parts[-1] = 'com'
+                    emails[i] = '.'.join(parts)
         return emails
 
 def main():
@@ -75,12 +71,12 @@ def main():
 
     if args.output:
         extractor = EmailExtractor(args.path, args.output, not_found_path)
-        email = extractor.read_files()
+        email = extractor.read_pdf()
         unique_emails = list(set(email))
         formatted_emails = extractor.format_emails(unique_emails)
         extractor.write_csv(formatted_emails)
         print("Emails extracted and saved to:", extractor.output_file)
-        print("PDFs with no emails and non-PDF files moved to:", not_found_path)
+        print("PDFs with no emails moved to:", not_found_path)
 
 if __name__ == "__main__":
     main()
