@@ -69,7 +69,7 @@ def main():
 
     args = parser.parse_args()
 
-    not_found_path = './not_found'
+    not_found_path = './notfound'
     if not os.path.exists(not_found_path):
         os.makedirs(not_found_path)
 
