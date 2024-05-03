@@ -39,12 +39,21 @@ class EmailExtractor:
             for email in unique_emails:
                 writer.writerow([email])
 
+    def format_emails(self, emails):
+        """formatting emails"""
+        for i, email in enumerate(emails):
+            parts = email.split('.')
+            if parts[-1] == 'c' or parts[-1] == 'co' or parts[-1] == '':
+                parts[-1] = 'com'
+                emails[i] = '.'.join(parts)
+        return emails
+
 def main():
     """main function"""
 
-    parser = argparse.ArgumentParser(description="Generate weather reports.")
+    parser = argparse.ArgumentParser(description="Extracting emails from pdf resumes.")
     parser.add_argument("-O", "--output", type=str, help="output file name")
-    parser.add_argument("path", type=str, help="Path to the weather data folder")
+    parser.add_argument("path", type=str, help="Path to the resume data folder")
 
     args = parser.parse_args()
 
@@ -52,7 +61,8 @@ def main():
         extractor = EmailExtractor(args.path, args.output)
         email = extractor.read_pdf()
         unique_emails = list(set(email))
-        extractor.write_csv(unique_emails)
+        formatted_emails = extractor.format_emails(unique_emails)
+        extractor.write_csv(formatted_emails)
         print("Emails extracted and saved to:", extractor.output_file)
 
 if __name__ == "__main__":
