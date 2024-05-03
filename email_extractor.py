@@ -53,11 +53,12 @@ class EmailExtractor:
     def format_emails(self, emails):
         """formatting emails"""
         for i, email in enumerate(emails):
-            parts = email.split('.')
-            if parts[-1] == 'c' or parts[-1] == 'co' or parts[-1] == '':
-                parts[-1] = 'com'
-                emails[i] = '.'.join(parts)
-            return emails
+            if email is not None:
+                parts = email.split('.')
+                if parts[-1] == 'c' or parts[-1] == 'co' or parts[-1] == '':
+                    parts[-1] = 'com'
+                    emails[i] = '.'.join(parts)
+        return emails
 
 def main():
     """main function"""
