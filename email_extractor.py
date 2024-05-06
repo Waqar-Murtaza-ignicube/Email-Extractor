@@ -6,6 +6,7 @@ import argparse
 import shutil
 from pdfminer.high_level import extract_text
 
+
 class EmailExtractor:
     """class to pair up functionalities"""
     def __init__(self, path, filename, not_found_path):
@@ -60,6 +61,7 @@ class EmailExtractor:
                     emails[i] = '.'.join(parts)
         return emails
 
+
 def main():
     """main function"""
 
@@ -81,6 +83,7 @@ def main():
         extractor.write_csv(formatted_emails)
         print("Emails extracted and saved to:", extractor.output_file)
         print("PDFs with no emails and non-PDF files moved to:", not_found_path)
+
 
 if __name__ == "__main__":
     main()
