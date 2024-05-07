@@ -28,14 +28,15 @@ class EmailExtractor:
 
         for filename in os.listdir(self.resume_directory):
             file_path = os.path.join(self.resume_directory, filename)
-            if not filename.endswith('.pdf'):
+            if filename.endswith('.pdf'):
+                text = extract_text(file_path)
+                extracted_emails = self.extract_emails(text)
+                if extracted_emails:
+                    all_emails.append(extracted_emails)
+                else:
+                    self.move_file(filename, file_path)
+            else:
                 self.move_file(filename, file_path)
-            text = extract_text(file_path)
-            extracted_emails = self.extract_emails(text)
-            if not extracted_emails:
-                self.move_file(filename, file_path)
-            all_emails.append(extracted_emails)
-
         return all_emails
 
     def move_file(self, filename, source):
