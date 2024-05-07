@@ -6,6 +6,7 @@ import argparse
 import shutil
 from pdfminer.high_level import extract_text
 
+
 class EmailExtractor:
     """class to pair up functionalities"""
     def __init__(self, path, filename, not_found_path):
@@ -27,14 +28,15 @@ class EmailExtractor:
 
         for filename in os.listdir(self.resume_directory):
             file_path = os.path.join(self.resume_directory, filename)
-            if not filename.endswith('.pdf'):
+            if filename.endswith('.pdf'):
+                text = extract_text(file_path)
+                extracted_emails = self.extract_emails(text)
+                if extracted_emails:
+                    all_emails.append(extracted_emails)
+                else:
+                    self.move_file(filename, file_path)
+            else:
                 self.move_file(filename, file_path)
-            text = extract_text(file_path)
-            extracted_emails = self.extract_emails(text)
-            if not extracted_emails:
-                self.move_file(filename, file_path)
-            all_emails.append(extracted_emails)
-
         return all_emails
 
     def move_file(self, filename, source):
@@ -53,11 +55,13 @@ class EmailExtractor:
     def format_emails(self, emails):
         """formatting emails"""
         for i, email in enumerate(emails):
-            parts = email.split('.')
-            if parts[-1] == 'c' or parts[-1] == 'co' or parts[-1] == '':
-                parts[-1] = 'com'
-                emails[i] = '.'.join(parts)
-            return emails
+            if email is not None:
+                parts = email.split('.')
+                if parts[-1] == 'c' or parts[-1] == 'co' or parts[-1] == '':
+                    parts[-1] = 'com'
+                    emails[i] = '.'.join(parts)
+        return emails
+
 
 def main():
     """main function"""
@@ -80,6 +84,7 @@ def main():
         extractor.write_csv(formatted_emails)
         print("Emails extracted and saved to:", extractor.output_file)
         print("PDFs with no emails and non-PDF files moved to:", not_found_path)
+
 
 if __name__ == "__main__":
     main()
